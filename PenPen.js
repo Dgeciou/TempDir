@@ -167,13 +167,13 @@ var PenPen = {
 		
 		// 获取起始位置（box的位置）
 		const boxRect = box.getBoundingClientRect();
-		const startX = boxRect.left;
-		const startY = boxRect.top;
+		const startX = boxRect.left + 10;
+		const startY = boxRect.top + 10;
 		
 		// 获取目标位置（单元格的位置）
 		const targetRect = targetCell.getBoundingClientRect();
-		const targetX = targetRect.left;
-		const targetY = targetRect.top;
+		const targetX = targetRect.left + 10;
+		const targetY = targetRect.top + 10;
 		
 		// 设置飞行表情的初始位置
 		flyingEmoji.style.left = `${startX}px`;
@@ -407,21 +407,34 @@ var PenPen = {
 	},
 	
 	matchAnimate: function(matchArr, callback){
-		//背景变红
 		for (var i = 0; i < matchArr.length; i++)
 		{
 			const targetCell = document.getElementById(`cell_${matchArr[i]}`);
-			targetCell.style.backgroundColor  = 'red';
+			// 创建飞行表情元素
+			const flyingEmoji = document.createElement('div');
+			flyingEmoji.style.cssText = 'position: absolute; font-size: 2.5rem; z-index: 10;';
+			// 获取起始位置
+			const targetRect = targetCell.getBoundingClientRect();
+			const startX = targetRect.left + 10;
+			const startY = targetRect.top + 10;			
+			// 设置飞行表情的初始位置
+			flyingEmoji.style.left = `${startX}px`;
+			flyingEmoji.style.top = `${startY}px`;
+			document.body.appendChild(flyingEmoji);
+			
+			// 执行动画
+			flyingEmoji.textContent = targetCell.textContent;
+			targetCell.textContent = "";
+			flyingEmoji.animate([
+				{ transform: `translate(0, 0)`},
+				{ transform: `translate(0, -30px)`}
+			], {
+				duration: 500,
+			}).onfinish = function(){
+				flyingEmoji.remove();
+			};
 		}
-		setTimeout(() => {
-			for (var i = 0; i < matchArr.length; i++)
-			{
-				const targetCell = document.getElementById(`cell_${matchArr[i]}`);
-				targetCell.style.backgroundColor  = 'white';
-			}
-			PenPen.updateGameArea();
-			callback();
-		}, 800);
+		setTimeout(callback, 500);
 	},
 	
 	onArrival: function() {
